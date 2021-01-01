@@ -1,0 +1,3 @@
+{
+    "typescript.tsdk": "./client/hanaoke/node_modules/typescript/lib"
+}
