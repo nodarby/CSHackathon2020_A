@@ -2,17 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3c7229cd-13a7-4aaa-8459-4b1c4bd28e92" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/CSHackathon2020_A.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/hanaoke/src/Home.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/hanaoke/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/client/hanaoke/.eslintcache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/hanaoke/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/hanaoke/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/hanaoke/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/hanaoke/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/hanaoke/src/App.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/hanaoke/src/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/hanaoke/src/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,10 +21,18 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/client/hanaoke/src" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="ts.external.directory.path" value="$PROJECT_DIR$/client/hanaoke/node_modules/typescript/lib" />
     <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/client/hanaoke/src" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/client/hanaoke/public" />
+    </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -44,7 +42,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1609336553316</updated>
-      <workItem from="1609336556766" duration="7790000" />
+      <workItem from="1609336556766" duration="13880000" />
     </task>
     <servers />
   </component>
