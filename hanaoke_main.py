@@ -16,7 +16,7 @@ class Hanaoke():
 
     def __init__(self, wav_file, bpm): 
         self.bpm = bpm
-        self.rug = 17
+        self.rug = 8
         self.sampling_rate = int(50*120/bpm)
         self.wav_file = wav_file
         self.Note()
@@ -150,31 +150,60 @@ class Hanaoke():
         #note4つ(2拍)をとってきて含まれている音の数でコード判定
         #1,4,5のどれか
         code_ls = []
-        j = 1
+        j = 0
         points = {"tonic":0,"subdominant":0,"dominant":0}
-        for i in range(rug+1,len(note_ls)):
+        for i in range(rug,len(note_ls)):
             note = note_ls[i][:-1]
+            j += 1
+            #ポイント決定ここから
+
+            #通常のポイント
             if note in tonic:
-                points["tonic"] = points["tonic"] + 1
+                points["tonic"] += 2
             if note in subdominant:
-                points["subdominant"] += 1
+                points["subdominant"] += 2
             if note in dominant:
-                points["dominant"] += 1
+                points["dominant"] += 2
             
+            #小節頭の音にはボーナス
+            if j == 1:
+                if note in tonic:
+                    points["tonic"] += 2
+                if note in subdominant:
+                    points["subdominant"] += 2
+                if note in dominant:
+                    points["dominant"] += 2
+
+            #小節最後の音は1点
+            if note in tonic:
+                points["tonic"] -= 1
+            if note in subdominant:
+                points["subdominant"] -= 1
+            if note in dominant:
+                points["dominant"] -= 1
+
             print(note,points)
-            if i == rug + j*4:
+            #ポイント決定ここまで
+            if j == 4:
                 counter = Counter(points)
                 points = sorted(points.items(), key=lambda x:x[1],reverse=True)
-                code = points[0][0]  
+                if points[0][1] == 0:
+                    code = "N"
+                else:
+                    code = points[0][0]   
                 code_ls.append(code)
-                j += 1
+                j = 0
+                #安定ソートなので困ったらtonic
                 points = {"tonic":0,"subdominant":0,"dominant":0}
                 print(code)
-                
-        counter = Counter(points)
-        points = sorted(points.items(), key=lambda x:x[1],reverse=True)
-        code = points[0][0]  
-        code_ls.append(code)
+        else:       
+            counter = Counter(points)
+            points = sorted(points.items(), key=lambda x:x[1],reverse=True)
+            if points[0][1] == 0:
+                code = "N"
+            else:
+                code = points[0][0]  
+            code_ls.append(code)
   
         self.code_ls = code_ls
 
@@ -195,9 +224,8 @@ class Hanaoke():
 
 
 if __name__ == "__main__":
-    wav_file = "./data/sample_ashita2.wav"
-    bpm = 115
+    wav_file = "./data/ashita_miku.wav"
+    bpm = 120
     hanaoke = Hanaoke(wav_file,bpm)
-    print(hanaoke.ShowNote())
     print(hanaoke.ShowScale())
     print(hanaoke.ShowCode())
