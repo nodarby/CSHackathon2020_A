@@ -24,3 +24,6 @@ yarn-error.log*
 
 # Optional eslint cache
 .eslintcache
+
+/server/sounds
+/client/hanaoke/node_modules
