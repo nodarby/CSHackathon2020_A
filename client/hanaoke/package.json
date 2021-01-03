@@ -8,6 +8,7 @@
     "@testing-library/jest-dom": "^5.11.8",
     "@testing-library/react": "^11.2.2",
     "@testing-library/user-event": "^12.6.0",
+    "@types/dom-mediacapture-record": "^1.0.7",
     "@types/howler": "^2.2.1",
     "@types/jest": "^26.0.19",
     "@types/node": "^12.19.11",
@@ -19,6 +20,7 @@
     "react-howler": "^5.0.0",
     "react-scripts": "4.0.1",
     "react-sound": "^1.2.0",
+    "recorderjs": "^1.0.1",
     "web-vitals": "^0.2.4"
   },
   "scripts": {

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Button from '@material-ui/core/Button';
 import Grid from "@material-ui/core/Grid"
 import TextField from '@material-ui/core/TextField';
 import ReactHowler from 'react-howler'
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
+import Recording from "./Recording";
 
 // JavaScript の場合は makeStyles(theme => styleObject)で良い
 const useStyles = makeStyles((theme: Theme) =>
@@ -25,13 +26,63 @@ type Props = {
 export function Home({title}: Props) {
     const classes = useStyles();
     const [bpm, setBpm] = useState(70);
+    const [mute, setMute] = useState(false);
     const [recordStatus, setRecordStatus] = useState(false)
+    const [file, setFile] = useState<Array<Blob>| null>([]);
+    const [audioState, setAudioState] = useState(true);
     const [soundStatus, setSoundStatus] = useState(false);
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setBpm(Number(event.target.value))
     }
+    let audioRef = useRef<MediaRecorder | null>(null);
+
+
+    useEffect(() => {
+        // マイクへのアクセス権を取得
+        //audioのみtrue
+        navigator.getUserMedia(
+            {
+                audio: true,
+                video: false,
+            },
+            handleSuccess,
+            handleError
+        );
+    }, []);
+
+    const handleSuccess = (stream: MediaStream) => {
+        // レコーディングのインスタンスを作成
+        audioRef.current = new MediaRecorder(stream, {
+            mimeType: "video/webm;codecs=vp9",
+        });
+        // 音声データを貯める場所
+        let chunks: Array<Blob>= [];
+        // 録音が終わった後のデータをまとめる
+        audioRef.current.addEventListener("dataavailable", (ele: BlobEvent) => {
+            if (ele.data.size > 0) {
+                chunks.push(ele.data);
+            }
+            // 音声データをセット
+            setFile(chunks);
+        });
+        // 録音を開始したら状態を変える
+        audioRef.current.addEventListener("start", () => setAudioState(false));
+        // 録音がストップしたらchunkを空にして、録音状態を更新
+        audioRef.current.addEventListener("stop", () => {
+            setAudioState(true);
+            chunks = [];
+        });
+    };
+
+    const handleError = () => {
+        alert("エラーです。");
+    };
+
     const startRecord = () => {
         setRecordStatus(true)
+        if (audioRef.current) {
+            audioRef.current.start();
+        }
         //　録音中の画面に遷移
         setInterval(
             ()=> {
@@ -40,7 +91,10 @@ export function Home({title}: Props) {
     }
 
     const stopRecord = () => {
-        setSoundStatus(false)
+        setMute(true)
+        if (audioRef.current) {
+            audioRef.current.stop();
+        }
         //　音声データを送信
 
 
@@ -70,6 +124,7 @@ export function Home({title}: Props) {
     const recording = (
         <div className={classes.root}>
             <h2>録音中</h2>
+            <Recording/>
             <Button
                 variant="contained"
                 color="secondary"
@@ -90,13 +145,12 @@ export function Home({title}: Props) {
                         // 再生完了時のendイベント
                         setSoundStatus(false)
                     }}
+                    mute={mute}
                 />
                 {recordStatus ? recording : waiting}
             </Grid>
         </Grid>
     )
 }
-
-
 
 export default Home
