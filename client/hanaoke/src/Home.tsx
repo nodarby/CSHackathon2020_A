@@ -3,6 +3,7 @@ import Button from '@material-ui/core/Button';
 import Grid from "@material-ui/core/Grid"
 import TextField from '@material-ui/core/TextField';
 import ReactHowler from 'react-howler'
+import { useHistory } from "react-router-dom";
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 
 // JavaScript の場合は makeStyles(theme => styleObject)で良い
@@ -17,13 +18,9 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 );
 
-// props の型を定義
-type Props = {
-    title?: string;
-};
-
-export function Home({title}: Props) {
+export function Home() {
     const classes = useStyles();
+    const history = useHistory();
     const [bpm, setBpm] = useState(70);
     const [mute, setMute] = useState(false);
     const [recordStatus, setRecordStatus] = useState("waiting")
@@ -104,6 +101,7 @@ export function Home({title}: Props) {
 
 
         //　返してもらった後の表示処理
+        history.push("/result")
         console.log("終了")
     }
 
@@ -142,8 +140,8 @@ export function Home({title}: Props) {
             <Button
                 variant="contained"
                 color="primary"
-                onClick={() => console.log("送信")}
-            >鼻歌をオーケストラに！</Button>
+                onClick={() => handleSubmit()}
+                >鼻歌をオーケストラに！</Button>
         </div>
     )
 
@@ -162,7 +160,7 @@ export function Home({title}: Props) {
     return (
         <Grid container alignItems="center" justify="center">
             <Grid item xs={8}>
-                <h1>{title}</h1>
+                <h1>ハナオケ</h1>
                 <ReactHowler
                     src="bpm_sound.mp3"
                     playing={soundStatus}
