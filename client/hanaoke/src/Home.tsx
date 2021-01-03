@@ -4,7 +4,14 @@ import Grid from "@material-ui/core/Grid"
 import TextField from '@material-ui/core/TextField';
 import ReactHowler from 'react-howler'
 import { useHistory } from "react-router-dom";
+import ReactAudioPlayer from "react-audio-player";
+import axios from 'axios'
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
+
+// 付けないとCORSで弾かれる
+axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.headers.post['Content-Type'] = 'application/json;charset=utf-8';
+axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 
 // JavaScript の場合は makeStyles(theme => styleObject)で良い
 const useStyles = makeStyles((theme: Theme) =>
@@ -23,6 +30,7 @@ export function Home() {
     const history = useHistory();
     const [bpm, setBpm] = useState(70);
     const [mute, setMute] = useState(false);
+    const [url, setUrl] = useState("");
     const [recordStatus, setRecordStatus] = useState("waiting")
     const [file, setFile] = useState<Array<Blob>| null>([]);
     const [audioState, setAudioState] = useState(true);
@@ -56,12 +64,12 @@ export function Home() {
         // 録音が終わった後のデータをまとめる
         audioRef.current.addEventListener("dataavailable", (ele: BlobEvent) => {
             if (ele.data.size > 0) {
-                console.log("ためた")
                 chunks.push(ele.data);
-                console.log(chunks)
             }
             // 音声データをセット
             setFile(chunks);
+            setUrl(URL.createObjectURL(new Blob(chunks, { 'type' : 'audio/wav; codecs=MS_PCM' })))
+
         });
         // 録音を開始したら状態を変える
         audioRef.current.addEventListener("start", () => setAudioState(false));
@@ -93,16 +101,24 @@ export function Home() {
         if (audioRef.current) {
             audioRef.current.stop();
         }
+
         setRecordStatus("finished")
     }
 
     const handleSubmit = () => {
         //　音声データを送信
-
-
-        //　返してもらった後の表示処理
-        history.push("/result")
-        console.log("終了")
+        if (file){
+            const fd = new FormData();
+            const sound = new Blob(file, { type: 'audio/mp3' })
+            fd.append("hanauta", sound);
+            console.log(fd.get("hanauta"))
+            axios.post("api/v1/post_hanaoke", fd)
+                .then(res => {
+                    //　返してもらった後の表示処理
+                    history.push("/result")
+                    console.log(res)
+                })
+        }
     }
 
     const waiting = (
@@ -134,9 +150,11 @@ export function Home() {
         </div>
     )
 
+        //ここ直す
     const finished = (
         <div className={classes.root}>
             <h2>録音完了！</h2>
+            <ReactAudioPlayer src={url} controls />
             <Button
                 variant="contained"
                 color="primary"
