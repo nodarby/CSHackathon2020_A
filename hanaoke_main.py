@@ -434,7 +434,7 @@ class Hanaoke():
                    
         return track
                 
-    
+    """
     def CodeToDrum(self):
         bpm = self.bpm
         code_ls = self.code_ls
@@ -474,26 +474,10 @@ class Hanaoke():
                     track.append(Message('note_on', note = 42, velocity=127, time=240))
                    
         return track
-
+    """
 
     def MidiToWav(self):
-  
-        pm = pretty_midi.PrettyMIDI() 
-        violin_program = pretty_midi.instrument_name_to_program("Violin")
-        violin = pretty_midi.Instrument(program=violin_program)
-
-        note_number = pretty_midi.note_name_to_number("C5")
-        note = pretty_midi.Note(velocity=100, pitch=note_number, start=0, end=.5)
-        violin.notes.append(note)
-
-        pm.instruments.append(violin)
-
-        # fluidsynthでwavに変換
-        audio_data = pm.fluidsynth()
-
-        # wavファイル書き出し
-        # fluidsynthのfsが44100なので合わせる
-        wavfile.write("hoge.wav",44100, audio_data)
+        pass
 
 
     def ShowNote(self):
@@ -514,10 +498,10 @@ class Hanaoke():
         mid = MidiFile()
         piano = self.CodeToPiano()
         bass = self.CodeToBass()
-        drum = self.CodeToDrum()
+        #drum = self.CodeToDrum()
         mid.tracks.append(piano)
         mid.tracks.append(bass)
-        mid.tracks.append(drum)
+        #mid.tracks.append(drum)
         mid.save("instruments.mid")
        
         # program(楽器番号)を変更
@@ -526,7 +510,7 @@ class Hanaoke():
         
         midi_data = pretty_midi.PrettyMIDI('instruments.mid')    
         midi_data.instruments[bass].program = 34
-        midi_data.instruments[drum].program = 10
+        #midi_data.instruments[drum].program = 10
         self.midifile = midi_data
         midi_data.write('instruments.mid')
 
