@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import Grid from "@material-ui/core/Grid"
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 
 // JavaScript の場合は makeStyles(theme => styleObject)で良い
@@ -13,16 +14,18 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 );
 
-export function Recording() {
-    const [file, setFile] = useState([]);
-    const [audioState, setAudioState] = useState(true);
+export function Result() {
     const classes = useStyles();
-    return (
-        <div className={classes.root}>
-            <h2>マイク</h2>
-        </div>
 
+    return (
+        <Grid container alignItems="center" justify="center">
+            <Grid item xs={8}>
+                <div className="root">
+                <h1>"結果画面"</h1>
+                </div>
+            </Grid>
+        </Grid>
     )
 }
 
-export default Recording
+export default Result

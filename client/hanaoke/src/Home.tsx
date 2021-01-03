@@ -4,7 +4,6 @@ import Grid from "@material-ui/core/Grid"
 import TextField from '@material-ui/core/TextField';
 import ReactHowler from 'react-howler'
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
-import Recording from "./Recording";
 
 // JavaScript の場合は makeStyles(theme => styleObject)で良い
 const useStyles = makeStyles((theme: Theme) =>
@@ -27,7 +26,7 @@ export function Home({title}: Props) {
     const classes = useStyles();
     const [bpm, setBpm] = useState(70);
     const [mute, setMute] = useState(false);
-    const [recordStatus, setRecordStatus] = useState(false)
+    const [recordStatus, setRecordStatus] = useState("waiting")
     const [file, setFile] = useState<Array<Blob>| null>([]);
     const [audioState, setAudioState] = useState(true);
     const [soundStatus, setSoundStatus] = useState(false);
@@ -60,7 +59,9 @@ export function Home({title}: Props) {
         // 録音が終わった後のデータをまとめる
         audioRef.current.addEventListener("dataavailable", (ele: BlobEvent) => {
             if (ele.data.size > 0) {
+                console.log("ためた")
                 chunks.push(ele.data);
+                console.log(chunks)
             }
             // 音声データをセット
             setFile(chunks);
@@ -79,7 +80,7 @@ export function Home({title}: Props) {
     };
 
     const startRecord = () => {
-        setRecordStatus(true)
+        setRecordStatus("recording")
         if (audioRef.current) {
             audioRef.current.start();
         }
@@ -95,11 +96,14 @@ export function Home({title}: Props) {
         if (audioRef.current) {
             audioRef.current.stop();
         }
+        setRecordStatus("finished")
+    }
+
+    const handleSubmit = () => {
         //　音声データを送信
 
 
         //　返してもらった後の表示処理
-
         console.log("終了")
     }
 
@@ -124,7 +128,6 @@ export function Home({title}: Props) {
     const recording = (
         <div className={classes.root}>
             <h2>録音中</h2>
-            <Recording/>
             <Button
                 variant="contained"
                 color="secondary"
@@ -132,6 +135,29 @@ export function Home({title}: Props) {
             >録音終了</Button>
         </div>
     )
+
+    const finished = (
+        <div className={classes.root}>
+            <h2>録音完了！</h2>
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={() => console.log("送信")}
+            >鼻歌をオーケストラに！</Button>
+        </div>
+    )
+
+    //　画面の出し分け
+    const mainContent = () => {
+        switch (recordStatus){
+            case "waiting":
+                return(waiting)
+            case "recording":
+                return(recording)
+            case "finished":
+                return(finished)
+        }
+    }
 
     return (
         <Grid container alignItems="center" justify="center">
@@ -147,7 +173,7 @@ export function Home({title}: Props) {
                     }}
                     mute={mute}
                 />
-                {recordStatus ? recording : waiting}
+                {mainContent()}
             </Grid>
         </Grid>
     )

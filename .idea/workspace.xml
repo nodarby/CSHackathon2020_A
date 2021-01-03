@@ -2,11 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3c7229cd-13a7-4aaa-8459-4b1c4bd28e92" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/client/hanaoke/src/Recording.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/hanaoke/src/Result.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/hanaoke/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/hanaoke/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/hanaoke/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/hanaoke/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/hanaoke/src/Home.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/hanaoke/src/Home.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/hanaoke/src/Recording.tsx" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,7 +45,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1609336553316</updated>
-      <workItem from="1609336556766" duration="20159000" />
+      <workItem from="1609336556766" duration="22212000" />
     </task>
     <servers />
   </component>
