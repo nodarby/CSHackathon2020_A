@@ -7,6 +7,7 @@ from collections import Counter,OrderedDict
 import mido
 from mido import Message, MidiFile, MidiTrack, MetaMessage
 import pretty_midi
+from midi2audio import FluidSynth
 #!python3.7
 
 
@@ -224,6 +225,7 @@ class Hanaoke():
         note_num = self.note_num_dic[notename[:-1]] + int(notename[-1])*12
         return note_num
 
+
     #コードの音名をノートナンバーに変換する.オクターブ数4
     def CodeNumber(self,code):
         code_num_ls = []
@@ -231,6 +233,13 @@ class Hanaoke():
             notename = "".join([i,"5"])
             code_num_ls.append(self.NoteNumber(notename))
         return code_num_ls
+
+
+    def ControlRug(self,track):
+        for i in range(self.rug):
+            track.append(Message('note_off', note=64, time=1))
+            track.append(Message('note_off', note=64, time=239))
+        return track
 
 
     def CodeToPiano(self):
@@ -246,6 +255,12 @@ class Hanaoke():
         mid.tracks.append(track)
         track.append(MetaMessage('set_tempo', tempo=mido.bpm2tempo(bpm)))
         
+
+        #ラグの部分、要調整
+        track = self.ControlRug(track)
+        
+
+        #本体    
         for i in range(len(code_ls)):
             code = code_ls[i]
 
@@ -272,7 +287,6 @@ class Hanaoke():
                     track.append(Message('note_off', note=64, time=1))
                     track.append(Message('note_off', note=64, time=959))
 
-
             #コードが存在するとき
             else:
                 if code == "code1":
@@ -290,8 +304,7 @@ class Hanaoke():
                     track.append(Message('note_off', note = codenum[1], velocity=127, time=0))
                     track.append(Message('note_off', note = codenum[2], velocity=127, time=0))
 
-        mid.save("piano.mid")
-        print("codetopiano")
+        return track
 
 
 
@@ -309,13 +322,13 @@ class Hanaoke():
         root4 = self.note_num_dic[self.code4[0]] + 12*Octave(self.code4[0])
         root5 = self.note_num_dic[self.code5[0]] + 12*Octave(self.code5[0])
 
-        print(root1,self.code1[0],self.code4[0])
-
         mid = MidiFile()
         track = MidiTrack()
         mid.tracks.append(track)
         track.append(MetaMessage('set_tempo', tempo=mido.bpm2tempo(bpm)))
         
+        track = self.ControlRug(track)
+
         for i in range(len(code_ls)):
             code = code_ls[i]
             
@@ -335,7 +348,6 @@ class Hanaoke():
                     track.append(Message('note_off', note=64, time=1))
                     track.append(Message('note_off', note=64, time=959))
                     
-
             #コードが存在するとき
             else:
                 if code == "code1":
@@ -349,23 +361,27 @@ class Hanaoke():
                     track.append(Message('note_on', note = root, velocity=127, time=1))            
                     track.append(Message('note_off', note = root, velocity=127, time=239))
                    
-    
-        mid.save("bass.mid")
+        return track
+                
         
+    def MidiToWav(self):
+  
+        pm = pretty_midi.PrettyMIDI() 
+        violin_program = pretty_midi.instrument_name_to_program("Violin")
+        violin = pretty_midi.Instrument(program=violin_program)
 
-        # 変更したいファイルの読み込み
-        midi_data = pretty_midi.PrettyMIDI('bass.mid')
-        # 楽器の確認
-        print(midi_data.instruments[0].program)
-        # program(楽器番号)を変更
-        midi_data.instruments[0].program = 34
-        # 楽器の確認
+        note_number = pretty_midi.note_name_to_number("C5")
+        note = pretty_midi.Note(velocity=100, pitch=note_number, start=0, end=.5)
+        violin.notes.append(note)
 
-        # ファイルの書き出し
-        midi_data.write('bass.mid')
-        print("codetobass")
+        pm.instruments.append(violin)
 
+        # fluidsynthでwavに変換
+        audio_data = pm.fluidsynth()
 
+        # wavファイル書き出し
+        # fluidsynthのfsが44100なので合わせる
+        wavfile.write("hoge.wav",44100, audio_data)
 
     def ShowNote(self):
         return self.note_ls
@@ -382,13 +398,28 @@ class Hanaoke():
         return self.code_ls
 
     def MakeMidi(self):
-        self.CodeToPiano()
-        self.CodeToBass()
+        mid = MidiFile()
+        piano = self.CodeToPiano()
+        bass = self.CodeToBass()
+        mid.tracks.append(piano)
+        mid.tracks.append(bass)
+        mid.save("new_song.mid")
+       
+        # program(楽器番号)を変更
+        midi_data = pretty_midi.PrettyMIDI('new_song.mid')    
+        midi_data.instruments[1].program = 34
+
+        self.midifile = midi_data
+        midi_data.write('new_song.mid')
+
+
 
 if __name__ == "__main__":
     wav_file = "./data/ashita_miku.wav"
     bpm = 120
     hanaoke = Hanaoke(wav_file,bpm)
     print(hanaoke.ShowScale())
-    print(hanaoke.ShowCode())
+
     hanaoke.MakeMidi()
+    hanaoke.MidiToWav()
+    print("completed")
