@@ -7,6 +7,7 @@ import { useHistory } from "react-router-dom";
 import ReactAudioPlayer from "react-audio-player";
 import axios from 'axios'
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
+import {clearInterval} from "timers";
 
 // 付けないとCORSで弾かれる
 axios.defaults.baseURL = 'http://localhost:5000';
@@ -30,16 +31,19 @@ export function Home() {
     const history = useHistory();
     const [bpm, setBpm] = useState(70);
     const [mute, setMute] = useState(false);
+    const [mute2, setMute2] = useState(false);
     const [url, setUrl] = useState("");
     const [recordStatus, setRecordStatus] = useState("waiting")
-    const [file, setFile] = useState<Array<Blob>| null>([]);
+    const [file, setFile] = useState<Blob| null>(null);
     const [audioState, setAudioState] = useState(true);
     const [soundStatus, setSoundStatus] = useState(false);
+    const [sound2Status, setSound2Status] = useState(false);
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setBpm(Number(event.target.value))
     }
     let audioRef = useRef<MediaRecorder | null>(null);
-
+    let timer1: number
+    let timer2: number
 
     useEffect(() => {
         // マイクへのアクセス権を取得
@@ -67,8 +71,9 @@ export function Home() {
                 chunks.push(ele.data);
             }
             // 音声データをセット
-            setFile(chunks);
-            setUrl(URL.createObjectURL(new Blob(chunks, { 'type' : 'audio/wav; codecs=MS_PCM' })))
+            const hanauta = new Blob(chunks, { 'type' : 'audio/wav' })
+            setFile(hanauta);
+            setUrl(URL.createObjectURL(hanauta))
 
         });
         // 録音を開始したら状態を変える
@@ -90,18 +95,26 @@ export function Home() {
             audioRef.current.start();
         }
         //　録音中の画面に遷移
-        setInterval(
+        setSound2Status(true)
+        timer1 = window.setInterval(
             ()=> {
                 setSoundStatus(true)
             }, 60000/bpm)
+        timer2 = window.setInterval(
+            ()=> {
+                setMute(true)
+                setSound2Status(true)
+            }, 60000*4/bpm)
     }
 
     const stopRecord = () => {
+        window.clearInterval(timer1)
+        window.clearInterval(timer2)
         setMute(true)
+        setMute2(true)
         if (audioRef.current) {
             audioRef.current.stop();
         }
-
         setRecordStatus("finished")
     }
 
@@ -109,9 +122,8 @@ export function Home() {
         //　音声データを送信
         if (file){
             const fd = new FormData();
-            const sound = new Blob(file, { type: 'audio/mp3' })
-            fd.append("hanauta", sound);
-            console.log(fd.get("hanauta"))
+            fd.append("hanauta", file);
+            fd.append("bpm", bpm.toString());
             axios.post("api/v1/post_hanaoke", fd)
                 .then(res => {
                     //　返してもらった後の表示処理
@@ -142,6 +154,31 @@ export function Home() {
     const recording = (
         <div className={classes.root}>
             <h2>録音中</h2>
+            <ReactHowler
+                src="bpm_sound.mp3"
+                playing={soundStatus}
+                loop= {true}
+                onEnd={() => {
+                    // 再生完了時のendイベント
+                    setSoundStatus(false)
+                }}
+                mute={mute}
+            />
+            <ReactHowler
+                src="Onmtp-Ding05-3.mp3"
+                playing={sound2Status}
+                loop= {true}
+                onEnd={() => {
+                    // 再生完了時のendイベント
+                    setSound2Status(false)
+                    if(mute2){
+                        setMute(true)
+                    } else {
+                        setMute(false)
+                    }
+                }}
+                mute={mute2}
+            />
             <Button
                 variant="contained"
                 color="secondary"
@@ -179,16 +216,6 @@ export function Home() {
         <Grid container alignItems="center" justify="center">
             <Grid item xs={8}>
                 <h1>ハナオケ</h1>
-                <ReactHowler
-                    src="bpm_sound.mp3"
-                    playing={soundStatus}
-                    loop= {true}
-                    onEnd={() => {
-                        // 再生完了時のendイベント
-                        setSoundStatus(false)
-                    }}
-                    mute={mute}
-                />
                 {mainContent()}
             </Grid>
         </Grid>

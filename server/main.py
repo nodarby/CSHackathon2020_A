@@ -10,13 +10,13 @@ def post_hanaoke():
     if request.method != 'POST':
         return make_response(jsonify({'result': 'invalid method'}), 400)
 
-    hanauta = request.files['hanauta']
-    fname = "sounds/" + datetime.datetime.now().strftime('%m%d%H%M%S') + ".mp3"
-    with open(f"{fname}", "wb") as f:
-        f.write(hanauta.read())
+    #録音した音声のバイナリデータ
+    fname = "sounds/" + datetime.datetime.now().strftime('%m%d%H%M%S') + ".wav"
+    with open(f"{fname}", 'wb') as f:
+        f.write(request.files['hanauta'].read())
     print(f"posted sound file: {fname}")
     # 佐藤くんのロジック部分を合体
-
+    print("BPM:"+request.form['bpm'])
 
     # 生成した音声データを返す
     return "hello"
