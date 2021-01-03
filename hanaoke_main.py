@@ -26,6 +26,8 @@ class Hanaoke():
         self.Note()
         self.ScaleJudge()
         self.CodeJudge()
+        self.MakeMidi()
+        self.MidiToWav()
 
     def PitchAnalyze(self):
         
@@ -116,7 +118,6 @@ class Hanaoke():
                 flag = 1
         
         mid.save("new_song.mid")
-
 
 
     def ScaleJudge(self):
@@ -242,6 +243,75 @@ class Hanaoke():
         return track
 
 
+
+    def CodeToPiano(self):
+        bpm = self.bpm
+        code_ls = self.code_ls
+        beat = 60/bpm
+
+        self.code1_num = self.CodeNumber(self.code1)
+        self.code4_num = self.CodeNumber(self.code4)
+        self.code5_num = self.CodeNumber(self.code5)
+
+        mid = MidiFile()
+        track = MidiTrack()
+        mid.tracks.append(track)
+        track.append(MetaMessage('set_tempo', tempo=mido.bpm2tempo(bpm)))
+        
+        
+
+        #ラグの部分、要調整
+        track = self.ControlRug(track)
+        
+
+        #本体    
+        for i in range(len(code_ls)):
+            code = code_ls[i]
+
+            #休符の時
+            if code == "N":
+                
+                #直前にコードが存在すれば2拍ならす
+                #codenumは直前のものが残る
+                beforecode = code_ls[i-1]
+                if beforecode in ["code1","code4","code5"]:
+                    track.append(Message('note_on', note = codenum[0], velocity=127, time=1))
+                    track.append(Message('note_on', note = codenum[1], velocity=127, time=0))
+                    track.append(Message('note_on', note = codenum[2], velocity=127, time=0))
+                    
+                    track.append(Message('note_off', note = codenum[0], velocity=127, time=479))
+                    track.append(Message('note_off', note = codenum[1], velocity=127, time=0))
+                    track.append(Message('note_off', note = codenum[2], velocity=127, time=0))
+                    
+                    track.append(Message('note_off', note=64, time=1))
+                    track.append(Message('note_off', note=64, time=479))
+
+                #休符にする場合
+                else:
+                    track.append(Message('note_off', note=64, time=1))
+                    track.append(Message('note_off', note=64, time=959))
+
+            #コードが存在するとき
+            else:
+                if code == "code1":
+                    codenum = self.code1_num
+                elif code == "code4":
+                    codenum = self.code4_num
+                elif code == "code5":
+                    codenum = self.code5_num
+                for i in range(2):
+                    track.append(Message('note_on', note = codenum[0], velocity=127, time=1))
+                    track.append(Message('note_on', note = codenum[1], velocity=127, time=0))
+                    track.append(Message('note_on', note = codenum[2], velocity=127, time=0))
+                    
+                    track.append(Message('note_off', note = codenum[0], velocity=127, time=479))
+                    track.append(Message('note_off', note = codenum[1], velocity=127, time=0))
+                    track.append(Message('note_off', note = codenum[2], velocity=127, time=0))
+
+        return track
+
+
+    """
     def CodeToPiano(self):
         bpm = self.bpm
         code_ls = self.code_ls
@@ -305,6 +375,7 @@ class Hanaoke():
                     track.append(Message('note_off', note = codenum[2], velocity=127, time=0))
 
         return track
+    """
 
 
 
@@ -363,7 +434,48 @@ class Hanaoke():
                    
         return track
                 
+    
+    def CodeToDrum(self):
+        bpm = self.bpm
+        code_ls = self.code_ls
+
+        mid = MidiFile()
+        track = MidiTrack()
+        mid.tracks.append(track)
+        track.append(MetaMessage('set_tempo', tempo=mido.bpm2tempo(bpm)))
         
+        track = self.ControlRug(track)
+
+        for i in range(len(code_ls)):
+            code = code_ls[i]
+            
+            #休符の時
+            if code == "N":
+                
+                #直前にコードが存在すれば1拍ならす
+                beforecode = code_ls[i-1]
+                if beforecode in ["code1","code4","code5"]:
+                    track.append(Message('note_on', note = root, velocity=127, time=1))            
+                    track.append(Message('note_off', note = root, velocity=127, time=479))
+                    track.append(Message('note_off', note=64, time=1))
+                    track.append(Message('note_off', note=64, time=479))
+                #休符にする場合
+                else:
+                    flag = 1
+                    track.append(Message('note_off', note=64, time=1))
+                    track.append(Message('note_off', note=64, time=959))
+                    
+            #コードが存在するとき
+            else:  
+                for i in range(4):
+                    track.append(Message('note_on', note = 35, velocity=127, time=0))            
+                    track.append(Message('note_on', note = 42, velocity=127, time=240))
+                    track.append(Message('note_on', note = 35, velocity=127, time=240))            
+                    track.append(Message('note_on', note = 42, velocity=127, time=240))
+                   
+        return track
+
+
     def MidiToWav(self):
   
         pm = pretty_midi.PrettyMIDI() 
@@ -383,6 +495,7 @@ class Hanaoke():
         # fluidsynthのfsが44100なので合わせる
         wavfile.write("hoge.wav",44100, audio_data)
 
+
     def ShowNote(self):
         return self.note_ls
 
@@ -401,25 +514,26 @@ class Hanaoke():
         mid = MidiFile()
         piano = self.CodeToPiano()
         bass = self.CodeToBass()
+        drum = self.CodeToDrum()
         mid.tracks.append(piano)
         mid.tracks.append(bass)
-        mid.save("new_song.mid")
+        mid.tracks.append(drum)
+        mid.save("instruments.mid")
        
         # program(楽器番号)を変更
-        midi_data = pretty_midi.PrettyMIDI('new_song.mid')    
-        midi_data.instruments[1].program = 34
-
+        bass = 1
+        drum = 2
+        
+        midi_data = pretty_midi.PrettyMIDI('instruments.mid')    
+        midi_data.instruments[bass].program = 34
+        midi_data.instruments[drum].program = 10
         self.midifile = midi_data
-        midi_data.write('new_song.mid')
+        midi_data.write('instruments.mid')
 
 
 
 if __name__ == "__main__":
     wav_file = "./data/ashita_miku.wav"
     bpm = 120
-    hanaoke = Hanaoke(wav_file,bpm)
-    print(hanaoke.ShowScale())
-
-    hanaoke.MakeMidi()
-    hanaoke.MidiToWav()
+    hanaoke = Hanaoke(wav_file,bpm)    
     print("completed")
