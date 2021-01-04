@@ -10,7 +10,7 @@ import pretty_midi
 from midi2audio import FluidSynth
 import random 
 import mixing
-import soundfile
+#import soundfile
 #!python3.7
 
 
@@ -23,14 +23,14 @@ class Hanaoke():
     
     def __init__(self, wav_file, bpm): 
         self.bpm = bpm
-        self.rug = 0
+        self.rug = 0.35
         self.sampling_rate = int(50*120/bpm)
         self.wav_file = wav_file
         self.Note()
         self.ScaleJudge()
         self.CodeJudge()
         self.MakeMidi()
-        self.MidiToWav()
+      #  self.MidiToWav()
 
     def PitchAnalyze(self):
         
@@ -60,16 +60,17 @@ class Hanaoke():
         temp_ls = []
         note_ls = []
         f0 = self.f0
+        start = int(self.rug * 100)
 
         #各データを最も周波数の近い音名に変換
-        for i in range(len(f0)):
+        for i in range(start,len(f0)):
             now_freq = f0[i]
             now_notename = Hanaoke.freqlist[self.getNearestValue(now_freq)]
             temp_ls.append(now_notename)
 
             #SAMPLING_RATE内の最頻値を採用
             #周波数平均から求めるとポルタメント部分の影響でずれるので最頻値がよさそう
-            if i == self.sampling_rate * j - 1:
+            if i - start == self.sampling_rate * j - 1:
                 counter = Counter(temp_ls)
                 note_ls.append(counter.most_common()[0][0])
                 j += 1
@@ -160,7 +161,7 @@ class Hanaoke():
         scale = self.scale
 
         code1 = self.code1
-        code4 =  self.code4
+        code4 = self.code4
         code5 = self.code5
         
         #note4つ(2拍)をとってきて含まれている音の数でコード判定
@@ -168,7 +169,7 @@ class Hanaoke():
         code_ls = []
         j = 0
         points = {"code1":0,"code4":0,"code5":0}
-        for i in range(rug,len(note_ls)):
+        for i in range(len(note_ls)):
             note = note_ls[i][:-1]
             j += 1
             #ポイント決定ここから
@@ -326,7 +327,7 @@ class Hanaoke():
         inst_pm_num = pretty_midi.instrument_name_to_program("Electric Bass (finger)")
         track = pretty_midi.Instrument(program=inst_pm_num)
         
-        now = 0
+        now = self.rug
         def Octave(note):
             if note in ["C","C#","D","D#","E","F"]:
                 return 3
@@ -382,7 +383,7 @@ class Hanaoke():
         inst_pm_num = pretty_midi.instrument_name_to_program("Cello")
         track = pretty_midi.Instrument(program=inst_pm_num)
         
-        now = 0
+        now = self.rug
         def Octave(note):
             if note in ["C","C#","D","D#","E","F"]:
                 return 5
@@ -453,7 +454,7 @@ class Hanaoke():
                 #直前にコードが存在すれば2拍ならす
                 #codenumは直前のものが残っているので使う
                 beforecode = code_ls[i-1]
-                if beforecode in ["code1","code4","code5"]:
+                if beforecode in ["code1","code4","code5"] :
                     numrange = [0,1,2]
 
                     num = random.sample(numrange,2)
