@@ -29,3 +29,5 @@ yarn-error.log*
 /client/hanaoke/node_modules
 hoge.wav
 instruments.mid
+instruments.wav
+mixed_sounds.wav
