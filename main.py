@@ -19,11 +19,6 @@ def post_hanaoke():
     # 佐藤くんのロジック部分を合体
     hanaoke = hanaoke_main.Hanaoke(fname,int(request.form['bpm'])) 
 
-    
-    #return send_file(hanaoke.Wav(), as_attachment = True, \
-    #    attachment_filename = "hanaoke.wav", \
-    #    mimetype = 'audio/wav')
-
     response = make_response()
 
     response.data = open(hanaoke.Wav(), "rb").read()

@@ -10,7 +10,7 @@ import pretty_midi
 from midi2audio import FluidSynth
 import random 
 import mixing
-#import soundfile
+import soundfile
 #!python3.7
 
 
