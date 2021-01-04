@@ -485,7 +485,7 @@ class Hanaoke():
                 vnpitch = codenum[num[0]]+12
                 vn_note = pretty_midi.Note(velocity = 50,pitch = vnpitch,start=now,end=now+beat*2)
                 
-                
+                 
                 vlapitch = codenum[num[1]] + 12
                 if vlapitch > vnpitch:
                     vlapitch -= 12
@@ -499,18 +499,18 @@ class Hanaoke():
 
 
 
-    """ 
-    #未完成    
+    
+       
     def CodeToDrum(self):
         bpm = self.bpm
         code_ls = self.code_ls
         beat = 60/bpm
 
 
-        inst_pm_num = pretty_midi.instrument_name_to_program("Electric Bass (finger)")
-        track = pretty_midi.Instrument(program=inst_pm_num)
         
-        now = 0
+        track = pretty_midi.Instrument(program=35,is_drum = True)
+        
+        now = self.rug
 
         for i in range(len(code_ls)):
             code = code_ls[i]
@@ -520,31 +520,39 @@ class Hanaoke():
                 
                 #直前にコードが存在すればクラッシュ
                 beforecode = code_ls[i-1]
-                if beforecode in ["code1","code4","code5"]:
+                if beforecode in ["code1","code4","code5"]: 
                     note = pretty_midi.Note(velocity = 100,pitch = 49, start=now, end=now+beat/2)
-                    track.notes.append(note)           
-        
-                #休符にする場合
-                else:
-                    pass
+                    track.notes.append(note)                   
+                
+                #次のコードの頭でクラッシュ
+                if i+1 < len(code_ls) and code_ls[i+1] in ["code1","code4","code5"]:
+                        note = pretty_midi.Note(velocity = 100,pitch = 49, start=now+beat*2, end=now+beat*2)
+                        track.notes.append(note) 
+                        clash_interval = 1
+                
+                #拍数を進める
+                now += beat*2
                     
                     
             #コードが存在するとき
-            else:  
+            else:
+                
+                if clash_interval == 8:
+                    note = pretty_midi.Note(velocity = 100,pitch = 49, start=now+beat*2, end=now+beat*2)
+                    track.notes.append(note)
+                    clash_interval = 1
+                else: 
+                    clash_interval += 1
+                note = pretty_midi.Note(velocity = 120,pitch = 35, start=now, end=now+beat/2)
+                track.notes.append(note)
+                note = pretty_midi.Note(velocity = 120,pitch = 38, start=now+beat, end=now+(3*beat/2))
+                track.notes.append(note)
                 for i in range(4):
-                    note = pretty_midi.Note(velocity = 100,pitch = 35, start=now, end=now+beat/2)
+                    note = pretty_midi.Note(velocity = 100,pitch = 42, start=now, end=now+beat)
                     track.notes.append(note)
-                    note = pretty_midi.Note(velocity = 100,pitch = 42, start=now+beat/2, end=now+beat)
-                    track.notes.append(note)
-                    note = pretty_midi.Note(velocity = 100,pitch = 35, start=now+beat, end=now+(3*beat/2))
-                    track.notes.append(note)
-                    note = pretty_midi.Note(velocity = 100,pitch = 42, start=now+(3*beat/2), end=now+beat*2)
-                    track.notes.append(note)
-            
-            #拍数を進める
-            now += beat*2
+                    now += beat/2        
         return track
-    """   
+    
 
     def MidiToWav(self):
         # fluidsynthでwavに変換
@@ -579,17 +587,12 @@ class Hanaoke():
         mid.instruments.append(strings[1])
         mid.instruments.append(self.CodeToCello())
 
-        """
+        
         while len(mid.instruments) < 9:
             empty_track = pretty_midi.Instrument(program=0)
             mid.instruments.append(empty_track)
         mid.instruments.append(self.CodeToDrum())
-        
-        
-        print(mid.tracks)
-        mid.save("instruments.mid")
-        """
-        
+
 
         self.instruments = mid
         mid.write('instruments.mid')
@@ -597,9 +600,8 @@ class Hanaoke():
 
 
 if __name__ == "__main__":
-    
-    wav_file = "./data/sample_flyinget.wav"
+
+    wav_file = "./data/ashita_miku.wav"
     bpm = 120
     hanaoke = Hanaoke(wav_file,bpm)  
     print("completed")
-    
