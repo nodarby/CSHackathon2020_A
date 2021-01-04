@@ -477,6 +477,11 @@ class Hanaoke():
     """
 
     def MidiToWav(self):
+        # fluidsynthでwavに変換
+        audio_data = self.midifile.fluidsynth() 
+
+        # wavファイル書き出し
+        wavfile.write("hoge.wav",44100, audio_data)
         pass
 
 
@@ -517,7 +522,7 @@ class Hanaoke():
 
 
 if __name__ == "__main__":
-    wav_file = "./data/ashita_miku.wav"
+    wav_file = "./data/sample_yorukake.wav"
     bpm = 120
     hanaoke = Hanaoke(wav_file,bpm)    
     print("completed")
