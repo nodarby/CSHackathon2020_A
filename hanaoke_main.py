@@ -444,6 +444,7 @@ class Hanaoke():
         vlatrack = pretty_midi.Instrument(program=inst_pm_num)
         codenum = self.code1_num
         now = self.rug
+        vnpitch = 0
         #本体    
         for i in range(len(code_ls)):
             code = code_ls[i]
@@ -454,7 +455,11 @@ class Hanaoke():
                 #直前にコードが存在すれば2拍ならす
                 #codenumは直前のものが残っているので使う
                 beforecode = code_ls[i-1]
+<<<<<<< HEAD
                 if beforecode in ["code1","code4","code5"] :
+=======
+                if beforecode in ["code1","code4","code5"] and vnpitch != 0:
+>>>>>>> 0887e711aa2842747c52f7f3135ac5cac695abac
                     numrange = [0,1,2]
 
                     num = random.sample(numrange,2)

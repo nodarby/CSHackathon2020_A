@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from 'react'
 import Button from '@material-ui/core/Button';
 import Grid from "@material-ui/core/Grid"
 import TextField from '@material-ui/core/TextField';
+import MenuItem from '@material-ui/core/MenuItem';
 import ReactHowler from 'react-howler'
 import {useHistory} from "react-router-dom";
 import ReactAudioPlayer from "react-audio-player";
@@ -28,6 +29,41 @@ const useStyles = makeStyles((theme) =>
 );
 
 let recorder
+
+const currencies = [
+    {
+        value: 60,
+        label: '60',
+    },
+    {
+        value: 75,
+        label: '75',
+    },
+    {
+        value: 80,
+        label: '80',
+    },
+    {
+        value: 100,
+        label: '100',
+    },
+    {
+        value: 120,
+        label: '120',
+    },
+    {
+        value: 125,
+        label: '125',
+    },
+    {
+        value: 150,
+        label: '150',
+    },
+    {
+        value: 200,
+        label: '200',
+    },
+];
 
 export function Home() {
     const classes = useStyles();
@@ -122,9 +158,14 @@ export function Home() {
                 label="BPM"
                 value={bpm}
                 type="number"
+                select
                 onChange={handleChange}
                 helperText="BPMを選択してください（70~200を推奨）"
-            />
+            >{currencies.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                </MenuItem>
+            ))}</TextField>
             <Button
                 variant="contained"
                 color="primary"
