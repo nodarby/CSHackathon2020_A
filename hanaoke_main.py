@@ -8,8 +8,14 @@ import mido
 from mido import Message, MidiFile, MidiTrack, MetaMessage
 import pretty_midi
 from midi2audio import FluidSynth
+<<<<<<< HEAD
 import random 
 
+=======
+import mixing
+import soundfile
+#!python3.7
+>>>>>>> 結合（）
 
 
 class Hanaoke():
@@ -559,7 +565,9 @@ class Hanaoke():
         audio_data = self.midifile.fluidsynth() 
 
         # wavファイル書き出し
-        wavfile.write("hoge.wav",44100, audio_data)
+        soundfile.write("instruments.wav", audio_data, 44100, subtype='PCM_16')
+
+        mixing.mixing(self.wav_file, "instruments.wav")
         pass
 
     
@@ -600,7 +608,10 @@ class Hanaoke():
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
 
+=======
+>>>>>>> 44d89a54e506d91144ea94fab6e1ce38e59f5ebc
     wav_file = "./data/ashita_miku.wav"
     bpm = 120
     hanaoke = Hanaoke(wav_file,bpm)  
