@@ -8,15 +8,10 @@ import mido
 from mido import Message, MidiFile, MidiTrack, MetaMessage
 import pretty_midi
 from midi2audio import FluidSynth
-
 import random 
-
-
 import mixing
 #import soundfile
 #!python3.7
-
-
 
 
 class Hanaoke():
@@ -35,7 +30,7 @@ class Hanaoke():
         self.ScaleJudge()
         self.CodeJudge()
         self.MakeMidi()
-        #self.MidiToWav()
+        self.MidiToWav()
 
     def PitchAnalyze(self):
         
@@ -555,7 +550,7 @@ class Hanaoke():
 
     def MidiToWav(self):
         # fluidsynthでwavに変換
-        audio_data = self.midifile.fluidsynth() 
+        audio_data = self.instruments.fluidsynth() 
 
         # wavファイル書き出し
         soundfile.write("instruments.wav", audio_data, 44100, subtype='PCM_16')
@@ -577,6 +572,9 @@ class Hanaoke():
 
     def ShowCode(self):
         return self.code_ls
+
+    def Wav(self):
+        return "mixed_sounds.wav"
 
 
     def MakeMidi(self):

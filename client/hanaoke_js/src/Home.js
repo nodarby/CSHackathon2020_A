@@ -6,6 +6,8 @@ import ReactHowler from 'react-howler'
 import {useHistory} from "react-router-dom";
 import ReactAudioPlayer from "react-audio-player";
 import axios from 'axios'
+import Recorder from 'recorderjs'
+import MyRecorder from "./MyRecorder";
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 
 // 付けないとCORSで弾かれる
@@ -14,7 +16,7 @@ axios.defaults.headers.post['Content-Type'] = 'application/json;charset=utf-8';
 axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 
 // JavaScript の場合は makeStyles(theme => styleObject)で良い
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles((theme) =>
     createStyles({
         root: {
             padding: theme.spacing(2),
@@ -25,6 +27,8 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 );
 
+let recorder
+
 export function Home() {
     const classes = useStyles();
     const history = useHistory();
@@ -33,16 +37,16 @@ export function Home() {
     const [mute2, setMute2] = useState(false);
     const [url, setUrl] = useState("");
     const [recordStatus, setRecordStatus] = useState("waiting")
-    const [file, setFile] = useState<Blob| null>(null);
+    const [file, setFile] = useState(null);
+    const [fd, setFd] = useState(null);
     const [audioState, setAudioState] = useState(true);
     const [soundStatus, setSoundStatus] = useState(false);
     const [sound2Status, setSound2Status] = useState(false);
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (event) => {
         setBpm(Number(event.target.value))
     }
-    let audioRef = useRef<MediaRecorder | null>(null);
-    let timer1: number
-    let timer2: number
+    let timer1
+    let timer2
 
     useEffect(() => {
         // マイクへのアクセス権を取得
@@ -57,83 +61,10 @@ export function Home() {
         );
     }, []);
 
-    const exportWAV = (audioData: any, audio_sample_rate: number) => {
-        const encodeWAV = (samples: Float32Array, sampleRate: number) => {
-            const buffer = new ArrayBuffer(44 + samples.length * 2);
-            const view = new DataView(buffer);
-
-            const writeString = (view: any, offset: any, str: string) => {
-                for (let i = 0; i < str.length; i++) {
-                    view.setUint8(offset + i, str.charCodeAt(i));
-                }
-            };
-
-            const floatTo16BitPCM = (output: any, offset: any, input: any) => {
-                for (let i = 0; i < input.length; i++, offset += 2) {
-                    const s = Math.max(-1, Math.min(1, input[i]));
-                    output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
-                }
-            };
-
-            writeString(view, 0, "RIFF"); // RIFFヘッダ
-            view.setUint32(4, 32 + samples.length * 2, true); // これ以降のファイルサイズ
-            writeString(view, 8, "WAVE"); // WAVEヘッダ
-            writeString(view, 12, "fmt "); // fmtチャンク
-            view.setUint32(16, 16, true); // fmtチャンクのバイト数
-            view.setUint16(20, 1, true); // フォーマットID
-            view.setUint16(22, 1, true); // チャンネル数
-            view.setUint32(24, sampleRate, true); // サンプリングレート
-            view.setUint32(28, sampleRate * 2, true); // データ速度
-            view.setUint16(32, 2, true); // ブロックサイズ
-            view.setUint16(34, 16, true); // サンプルあたりのビット数
-            writeString(view, 36, "data"); // dataチャンク
-            view.setUint32(40, samples.length * 2, true); // 波形データのバイト数
-            floatTo16BitPCM(view, 44, samples); // 波形データ
-
-            return view;
-        };
-
-        const mergeBuffers = (audioData: any) => {
-            const sl = audioData.reduce((a: number, c: any) => a + c.length, 0);
-            const samples = new Float32Array(sl);
-            let sampleIdx = 0;
-            for (let i = 0; i < audioData.length; i++) {
-                for (let j = 0; j < audioData[i].length; j++) {
-                    samples[sampleIdx] = audioData[i][j];
-                    sampleIdx++;
-                }
-            }
-            return samples;
-        };
-        const dataview = encodeWAV(mergeBuffers(audioData), audio_sample_rate);
-        return new Blob([dataview], {type: "audio/wav"});
-    };
-
-    const handleSuccess = (stream: MediaStream) => {
-        // レコーディングのインスタンスを作成
-        audioRef.current = new MediaRecorder(stream, {
-            mimeType: "video/webm;codecs=vp9",
-        });
-        // 音声データを貯める場所
-        let chunks: Array<Blob>= [];
-        // 録音が終わった後のデータをまとめる
-        audioRef.current.addEventListener("dataavailable", (ele: BlobEvent) => {
-            if (ele.data.size > 0) {
-                chunks.push(ele.data);
-            }
-            // 音声データをセット
-            //const hanauta = exportWAV(chunks, 44100);
-            setFile(new Blob(chunks, { 'type' : 'audio/wav' }));
-            setUrl(URL.createObjectURL(new Blob(chunks, { 'type' : 'audio/wav' })))
-
-        });
-        // 録音を開始したら状態を変える
-        audioRef.current.addEventListener("start", () => setAudioState(false));
-        // 録音がストップしたらchunkを空にして、録音状態を更新
-        audioRef.current.addEventListener("stop", () => {
-            setAudioState(true);
-            chunks = [];
-        });
+    const handleSuccess = (stream) => {
+        let audio_context = new AudioContext()
+        let input = audio_context.createMediaStreamSource(stream)
+        recorder = new MyRecorder(input,{numChannels:1})
     };
 
     const handleError = () => {
@@ -142,9 +73,7 @@ export function Home() {
 
     const startRecord = () => {
         setRecordStatus("recording")
-        if (audioRef.current) {
-            audioRef.current.start();
-        }
+        recorder.record()
         //　録音中の画面に遷移
         setSound2Status(true)
         timer1 = window.setInterval(
@@ -159,29 +88,31 @@ export function Home() {
     }
 
     const stopRecord = () => {
+        recorder.stop()
+        recorder.exportWAV((blob) => {
+            setUrl(URL.createObjectURL(blob))
+            let formData = new FormData()
+            formData.append('hanauta', blob)
+            formData.append('bpm', bpm.toString())
+            setFd(formData)
+        })
         window.clearInterval(timer1)
         window.clearInterval(timer2)
         setMute(true)
         setMute2(true)
-        if (audioRef.current) {
-            audioRef.current.stop();
-        }
         setRecordStatus("finished")
     }
 
     const handleSubmit = () => {
         //　音声データを送信
-        if (file){
-            const fd = new FormData();
-            fd.append("hanauta", file);
-            fd.append("bpm", bpm.toString());
-            axios.post("api/v1/post_hanaoke", fd)
-                .then(res => {
-                    //　返してもらった後の表示処理
-                    history.push("/result")
-                    console.log(res)
-                })
-        }
+        axios.post("api/v1/post_hanaoke", fd,{
+            responseType: 'blob',
+        })
+            .then(res => {
+                //　返してもらった後の表示処理
+                let blob = new Blob([res.data], {type:"audio/wav"});
+                history.push({ pathname: '/result', state: { url:URL.createObjectURL(blob) }})
+            })
     }
 
     const waiting = (

@@ -1,3 +1,4 @@
 {
-    "typescript.tsdk": "./client/hanaoke/node_modules/typescript/lib"
+    "typescript.tsdk": "./client/hanaoke/node_modules/typescript/lib",
+    "git.ignoreLimitWarning": true
 }
