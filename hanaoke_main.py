@@ -534,8 +534,7 @@ class Hanaoke():
                 #次のコードの頭でクラッシュ
                 if i+1 < len(code_ls) and code_ls[i+1] in ["code1","code4","code5"]:
                         note = pretty_midi.Note(velocity = 100,pitch = 49, start=now+beat*2, end=now+beat*2)
-                        track.notes.append(note) 
-                        clash_interval = 1
+                        track.notes.append(note)
                 
                 #拍数を進める
                 now += beat*2
@@ -543,13 +542,6 @@ class Hanaoke():
                     
             #コードが存在するとき
             else:
-                
-                if clash_interval == 8:
-                    note = pretty_midi.Note(velocity = 100,pitch = 49, start=now+beat*2, end=now+beat*2)
-                    track.notes.append(note)
-                    clash_interval = 1
-                else: 
-                    clash_interval += 1
                 note = pretty_midi.Note(velocity = 120,pitch = 35, start=now, end=now+beat/2)
                 track.notes.append(note)
                 note = pretty_midi.Note(velocity = 120,pitch = 38, start=now+beat, end=now+(3*beat/2))
