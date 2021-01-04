@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request, send_file, make_response
 from flask_cors import CORS
 import datetime
 import hanaoke_main
@@ -12,14 +12,26 @@ def post_hanaoke():
         return make_response(jsonify({'result': 'invalid method'}), 400)
 
     fname = "data/" + datetime.datetime.now().strftime('%m%d%H%M%S') + ".wav"
+    sound = request.files['hanauta']
     with open(f"{fname}", 'wb') as f:
-        f.write(request.files['hanauta'].read())
+        sound.save(f)
 
     # 佐藤くんのロジック部分を合体
-    hanaoke = hanaoke_main.Hanaoke(fname,int(request.form['bpm']))    
+    hanaoke = hanaoke_main.Hanaoke(fname,int(request.form['bpm'])) 
 
-    # 生成した音声データを返す
-    return "hello"
+    
+    #return send_file(hanaoke.Wav(), as_attachment = True, \
+    #    attachment_filename = "hanaoke.wav", \
+    #    mimetype = 'audio/wav')
+
+    response = make_response()
+
+    response.data = open(hanaoke.Wav(), "rb").read()
+  
+    response.headers['Content-Disposition'] = 'attachment; filename=hanaoke.wav'
+
+    response.mimetype = "audio/wav"
+    return response
 
 
 if __name__ == "__main__":
