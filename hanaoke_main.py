@@ -28,7 +28,7 @@ class Hanaoke():
         self.ScaleJudge()
         self.CodeJudge()
         self.MakeMidi()
-        self.MidiToWav()
+        #self.MidiToWav()
 
     def PitchAnalyze(self):
         
@@ -206,11 +206,34 @@ class Hanaoke():
                 if points[0][1] == 0:
                     code = "N"
                 else:
-                    code = points[0][0]   
+                    #1位同率で片方([1])がcode1のとき)
+                    if points[0][1] == points[1][1] and points[0][0] == "code1":
+                        #次が休符ならcode1
+                        if (len(note_ls) > i+1 and note_ls[i+1] =="N")or i==3:
+                            code = "code1"
+                        #直前がcode1ならcode4かcode5
+                        elif code == "code1":
+                            code = points[1][0]
+                        #直前がcode4ならcode1かcode5
+                        elif code == "code4":
+                            if points[1][0] == "code5":
+                                code = "code5"
+                            else:
+                                code = "code1"
+                        #直前がcode5ならcode1
+                        elif code == "code5":
+                            code = "code1"
+                        #よくわからんかったらcode1
+                        else:
+                            code = "code1"
+
+                    else:
+                        code = points[0][0]                   
                 code_ls.append(code)
                 j = 0
-                #安定ソートなので困ったらcode1
+               
                 points = {"code1":0,"code4":0,"code5":0}
+
         else:       
             counter = Counter(points)
             points = sorted(points.items(), key=lambda x:x[1],reverse=True)
@@ -264,7 +287,7 @@ class Hanaoke():
                 beforecode = code_ls[i-1]
                 if beforecode in ["code1","code4","code5"]:
                     for j in range(3):
-                        note = pretty_midi.Note(velocity = 100,pitch = codenum[j],start=now,end=now+beat)
+                        note = pretty_midi.Note(velocity = 100,pitch = codenum[j],start=now,end=now+beat*2)
                         track.notes.append(note)
                     now += beat*2
 
@@ -322,7 +345,7 @@ class Hanaoke():
                 #直前にコードが存在すれば1拍ならす
                 beforecode = code_ls[i-1]
                 if beforecode in ["code1","code4","code5"]:
-                    note = pretty_midi.Note(velocity = 100,pitch = root, start=now, end=now+beat)
+                    note = pretty_midi.Note(velocity = 100,pitch = root, start=now, end=now+beat*2)
                     track.notes.append(note)
                     now += beat*2
 
@@ -359,9 +382,9 @@ class Hanaoke():
         now = 0
         def Octave(note):
             if note in ["C","C#","D","D#","E","F"]:
-                return 4
+                return 5
             else:
-                return 3
+                return 4
 
         root1 = self.note_num_dic[self.code1[0]] + 12*Octave(self.code1[0])
         root4 = self.note_num_dic[self.code4[0]] + 12*Octave(self.code4[0])
@@ -378,7 +401,7 @@ class Hanaoke():
                 #直前にコードが存在すれば1拍ならす
                 beforecode = code_ls[i-1]
                 if beforecode in ["code1","code4","code5"]:
-                    note = pretty_midi.Note(velocity = 50,pitch = root, start=now, end=now+beat)
+                    note = pretty_midi.Note(velocity = 50,pitch = root, start=now, end=now+beat*2)
                     track.notes.append(note)
 
                 #休符にする場合
@@ -429,9 +452,13 @@ class Hanaoke():
                 beforecode = code_ls[i-1]
                 if beforecode in ["code1","code4","code5"]:
                     numrange = [0,1,2]
+
                     num = random.sample(numrange,2)
-                    vn_note = pretty_midi.Note(velocity = 50,pitch = codenum[num[0]]+12,start=now,end=now+beat)
-                    vla_note = pretty_midi.Note(velocity = 50,pitch = codenum[num[1]],start=now,end=now+beat)
+                    vn_note = pretty_midi.Note(velocity = 50,pitch = vnpitch,start=now,end=now+beat*2)                
+                    vlapitch = codenum[num[1]] + 12
+                    if vlapitch > vnpitch:
+                        vlapitch -= 12
+                    vla_note = pretty_midi.Note(velocity = 50,pitch = vlapitch,start=now,end=now+beat*2)
                     vntrack.notes.append(vn_note)
                     vlatrack.notes.append(vla_note)
 
@@ -451,11 +478,18 @@ class Hanaoke():
                 #3音から任意の1つを2拍
                 
                 #バイオリンとビオラの重複は禁止
-                
+                #バイオリンよりビオラが高かったら1オク下げる
                 numrange = [0,1,2]
                 num = random.sample(numrange,2)
-                vn_note = pretty_midi.Note(velocity = 50,pitch = codenum[num[0]]+12,start=now,end=now+beat*2)
-                vla_note = pretty_midi.Note(velocity = 50,pitch = codenum[num[1]],start=now,end=now+beat*2)
+
+                vnpitch = codenum[num[0]]+12
+                vn_note = pretty_midi.Note(velocity = 50,pitch = vnpitch,start=now,end=now+beat*2)
+                
+                
+                vlapitch = codenum[num[1]] + 12
+                if vlapitch > vnpitch:
+                    vlapitch -= 12
+                vla_note = pretty_midi.Note(velocity = 50,pitch = vlapitch,start=now,end=now+beat*2)
                 vntrack.notes.append(vn_note)
                 vlatrack.notes.append(vla_note)
 
@@ -520,7 +554,7 @@ class Hanaoke():
         wavfile.write("hoge.wav",44100, audio_data)
         pass
 
-
+    
     def ShowNote(self):
         return self.note_ls
 
@@ -563,12 +597,8 @@ class Hanaoke():
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     
-    wav_file = "./data/ashita_miku.wav"
-=======
-    wav_file = "./data/sample_yorukake.wav"
->>>>>>> 0cc5e7352d585bbddfc739bf52ee4c82b5eadeea
+    wav_file = "./data/sample_flyinget.wav"
     bpm = 120
     hanaoke = Hanaoke(wav_file,bpm)  
     print("completed")
