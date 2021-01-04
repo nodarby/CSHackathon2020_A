@@ -282,7 +282,8 @@ class Hanaoke():
         
         
         now = self.rug
-        #本体    
+        #本体
+        codenum = self.code1_num
         for i in range(len(code_ls)):
             code = code_ls[i]
 
@@ -342,7 +343,7 @@ class Hanaoke():
         root5 = self.note_num_dic[self.code5[0]] + 12*Octave(self.code5[0])   
         
         now = self.rug
-
+        root = root1
         for i in range(len(code_ls)):
             code = code_ls[i]
             
@@ -398,7 +399,7 @@ class Hanaoke():
         root5 = self.note_num_dic[self.code5[0]] + 12*Octave(self.code5[0])   
         
         now = self.rug
-
+        root = root1
         for i in range(len(code_ls)):
             code = code_ls[i]
             
@@ -445,7 +446,7 @@ class Hanaoke():
         vntrack = pretty_midi.Instrument(program=inst_pm_num)
         inst_pm_num = pretty_midi.instrument_name_to_program("Viola")
         vlatrack = pretty_midi.Instrument(program=inst_pm_num)
-        
+        codenum = self.code1_num
         now = self.rug
         #本体    
         for i in range(len(code_ls)):
@@ -589,9 +590,9 @@ class Hanaoke():
         mid.instruments.append(self.CodeToCello())
 
         
-        while len(mid.instruments) < 9:
+        """while len(mid.instruments) < 9:
             empty_track = pretty_midi.Instrument(program=0)
-            mid.instruments.append(empty_track)
+            mid.instruments.append(empty_track)"""
         mid.instruments.append(self.CodeToDrum())
 
 
