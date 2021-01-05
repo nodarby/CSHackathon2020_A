@@ -23,12 +23,7 @@ class Hanaoke():
     
     def __init__(self, wav_file, bpm): 
         self.bpm = bpm
-<<<<<<< HEAD
-        self.rug = 0.2
-=======
-        # midiファイルに影響大
         self.rug = 0.20
->>>>>>> b73951e1205cba53f76a2b95badc98fd68dcc984
         self.sampling_rate = int(50*120/bpm)
         self.wav_file = wav_file
         self.Note()
@@ -456,12 +451,7 @@ class Hanaoke():
                 
                 #直前にコードが存在すれば2拍ならす
                 #codenumは直前のものが残っているので使う
-<<<<<<< HEAD
                 if i >= 1 and code_ls[i-1] in ["code1","code4","code5"]:
-=======
-                beforecode = code_ls[i-1]
-                if beforecode in ["code1","code4","code5"] and vnpitch != 0:
->>>>>>> b73951e1205cba53f76a2b95badc98fd68dcc984
                     numrange = [0,1,2]
 
                     num = random.sample(numrange,2)
