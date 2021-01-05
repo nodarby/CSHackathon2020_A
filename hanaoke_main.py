@@ -10,7 +10,7 @@ import pretty_midi
 from midi2audio import FluidSynth
 import random 
 import mixing
-#import soundfile
+import soundfile
 #!python3.7
 
 
@@ -23,14 +23,14 @@ class Hanaoke():
     
     def __init__(self, wav_file, bpm): 
         self.bpm = bpm
-        self.rug = 0.35
+        self.rug = 0.2
         self.sampling_rate = int(50*120/bpm)
         self.wav_file = wav_file
         self.Note()
         self.ScaleJudge()
         self.CodeJudge()
         self.MakeMidi()
-      #  self.MidiToWav()
+        self.MidiToWav()
 
     def PitchAnalyze(self):
         
@@ -288,8 +288,7 @@ class Hanaoke():
                 
                 #直前にコードが存在すれば2拍ならす
                 #codenumは直前のものが残る
-                beforecode = code_ls[i-1]
-                if beforecode in ["code1","code4","code5"]:
+                if i >= 1 and code_ls[i-1] in ["code1","code4","code5"]:
                     for j in range(3):
                         note = pretty_midi.Note(velocity = 100,pitch = codenum[j],start=now,end=now+beat*2)
                         track.notes.append(note)
@@ -347,8 +346,7 @@ class Hanaoke():
             if code == "N":
                 
                 #直前にコードが存在すれば1拍ならす
-                beforecode = code_ls[i-1]
-                if beforecode in ["code1","code4","code5"]:
+                if i >= 1 and code_ls[i-1] in ["code1","code4","code5"]:
                     note = pretty_midi.Note(velocity = 100,pitch = root, start=now, end=now+beat*2)
                     track.notes.append(note)
                     now += beat*2
@@ -403,8 +401,7 @@ class Hanaoke():
             if code == "N":
                 
                 #直前にコードが存在すれば1拍ならす
-                beforecode = code_ls[i-1]
-                if beforecode in ["code1","code4","code5"]:
+                if i >= 1 and code_ls[i-1] in ["code1","code4","code5"]:
                     note = pretty_midi.Note(velocity = 50,pitch = root, start=now, end=now+beat*2)
                     track.notes.append(note)
 
@@ -454,12 +451,7 @@ class Hanaoke():
                 
                 #直前にコードが存在すれば2拍ならす
                 #codenumは直前のものが残っているので使う
-                beforecode = code_ls[i-1]
-<<<<<<< HEAD
-                if beforecode in ["code1","code4","code5"] :
-=======
-                if beforecode in ["code1","code4","code5"] and vnpitch != 0:
->>>>>>> 0887e711aa2842747c52f7f3135ac5cac695abac
+                if i >= 1 and code_ls[i-1] in ["code1","code4","code5"]:
                     numrange = [0,1,2]
 
                     num = random.sample(numrange,2)
@@ -528,8 +520,7 @@ class Hanaoke():
             if code == "N":
                 
                 #直前にコードが存在すればクラッシュ
-                beforecode = code_ls[i-1]
-                if beforecode in ["code1","code4","code5"]: 
+                if i >= 1 and code_ls[i-1] in ["code1","code4","code5"]:
                     note = pretty_midi.Note(velocity = 100,pitch = 49, start=now, end=now+beat/2)
                     track.notes.append(note)                   
                 
@@ -606,7 +597,8 @@ class Hanaoke():
 
 
 if __name__ == "__main__":
-    wav_file = "./data/ashita_miku.wav"
-    bpm = 120
+    wav_file = "./data/0104231959.wav"
+    bpm = 80
     hanaoke = Hanaoke(wav_file,bpm)  
+    print(hanaoke.ShowCode())
     print("completed")
